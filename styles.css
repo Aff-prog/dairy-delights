@@ -134,6 +134,22 @@ main {
     height: auto;
     border-radius: 8px;
     margin-bottom: 1rem;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.product img:hover {
+    transform: scale(1.05);
+}
+
+.product img.added-to-cart {
+    animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .product h3 {
@@ -602,3 +618,14 @@ form input, form textarea, form select {
     border: 1px solid #ddd;
     border-radius: 4px;
 }
+
+.site-title {
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.site-title:hover {
+    color: var(--secondary-color);
+}
+

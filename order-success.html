@@ -10,16 +10,16 @@
 </head>
 <body>
     <header>
-        <h1>Dairy Delights</h1>
+        <h1><a href="index.html" class="site-title">Dairy Delights</a></h1>
     </header>
 
     <main>
-        <section id="order-success">
+        <section id="order-success" class="order-success-section">
             <h2>Order Placed Successfully!</h2>
             <p>Thank you for your order. Your order details are below:</p>
             <p>Order ID: <span id="order-id"></span></p>
             <div id="order-details"></div>
-            <button class="btn" onclick="window.location.href='index.html'">Back to Home</button>
+            <button class="btn" onclick="clearOrderAndGoHome()">Back to Home</button>
         </section>
     </main>
 

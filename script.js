@@ -54,10 +54,10 @@ function createProductElement(product) {
     const productDiv = document.createElement('div');
     productDiv.classList.add('product');
     productDiv.innerHTML = `
-        <img src="${product.image}" alt="${product.name}">
+        <img src="${product.image}" alt="${product.name}" onclick="addToCart(${product.id}); event.stopPropagation();">
         <h3>${product.name}</h3>
         <p>₹${product.price}</p>
-        <button class="btn" onclick="addToCart(${product.id})">Add to Cart</button>
+        <button class="btn" onclick="addToCart(${product.id}); event.stopPropagation();">Add to Cart</button>
     `;
     productDiv.addEventListener('click', () => toggleProductClick(productDiv));
     return productDiv;
@@ -83,6 +83,15 @@ function addToCart(productId) {
     updateCart();
     saveCart();
     showNotification(`${product.name} added to cart!`);
+
+    // Add a visual feedback for the clicked product
+    const productElement = document.querySelector(`.product img[alt="${product.name}"]`);
+    if (productElement) {
+        productElement.classList.add('added-to-cart');
+        setTimeout(() => {
+            productElement.classList.remove('added-to-cart');
+        }, 300);
+    }
 }
 
 function removeFromCart(index) {
@@ -190,6 +199,41 @@ function handlePaymentMethodChange() {
     }
 }
 
+function displayOrderSuccess() {
+    const orderSuccessSection = document.getElementById('order-success');
+    if (orderSuccessSection) {
+        const lastOrder = JSON.parse(localStorage.getItem('lastOrder'));
+        if (lastOrder) {
+            document.getElementById('order-id').textContent = lastOrder.orderId;
+            document.getElementById('order-details').innerHTML = `
+                <p><strong>Name:</strong> ${lastOrder.name}</p>
+                <p><strong>Email:</strong> ${lastOrder.email}</p>
+                <p><strong>Phone:</strong> ${lastOrder.phone}</p>
+                <p><strong>Address:</strong> ${lastOrder.address}</p>
+                <p><strong>Payment Method:</strong> ${lastOrder.payment}</p>
+                <h3>Order Summary:</h3>
+                <ul>
+                    ${lastOrder.items.map(item => `
+                        <li>
+                            <img src="${item.image}" alt="${item.name}" class="order-item-image">
+                            ${item.name} - ₹${item.price} x ${item.quantity}
+                        </li>
+                    `).join('')}
+                </ul>
+                <p><strong>Total:</strong> ₹${lastOrder.total}</p>
+            `;
+        } else {
+            orderSuccessSection.innerHTML = '<p>No order details found. Please place an order.</p>';
+        }
+    }
+}
+
+function clearOrderAndGoHome() {
+    localStorage.removeItem('lastOrder');
+    window.location.href = 'index.html';
+}
+
+// Modify the DOMContentLoaded event listener
 document.addEventListener('DOMContentLoaded', () => {
     displayTopProducts();
     displayAllProducts();
@@ -217,8 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
-            const address = document.getElementById('address').value;
+            const phone = document.getElementById('phone').value;
+            const street = document.getElementById('street').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const pincode = document.getElementById('pincode').value;
             const payment = document.getElementById('payment').value;
+
+            const address = `${street}, ${city}, ${state} - ${pincode}`;
 
             const orderId = Math.random().toString(36).substr(2, 9).toUpperCase();
 
@@ -227,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 orderId: orderId,
                 name: name,
                 email: email,
+                phone: phone,
                 address: address,
                 payment: payment,
                 items: cart,
@@ -245,30 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Handle order success page
-    const orderSuccessSection = document.getElementById('order-success');
-    if (orderSuccessSection) {
-        const lastOrder = JSON.parse(localStorage.getItem('lastOrder'));
-        if (lastOrder) {
-            document.getElementById('order-id').textContent = lastOrder.orderId;
-            document.getElementById('order-details').innerHTML = `
-                <p><strong>Name:</strong> ${lastOrder.name}</p>
-                <p><strong>Email:</strong> ${lastOrder.email}</p>
-                <p><strong>Address:</strong> ${lastOrder.address}</p>
-                <p><strong>Payment Method:</strong> ${lastOrder.payment}</p>
-                <h3>Order Summary:</h3>
-                <ul>
-                    ${lastOrder.items.map(item => `
-                        <li>
-                            <img src="${item.image}" alt="${item.name}" class="order-item-image">
-                            ${item.name} - ₹${item.price} x ${item.quantity}
-                        </li>
-                    `).join('')}
-                </ul>
-                <p><strong>Total:</strong> ₹${lastOrder.total}</p>
-            `;
-            // Clear the lastOrder from localStorage
-            localStorage.removeItem('lastOrder');
-        }
+    if (document.body.contains(document.getElementById('order-success'))) {
+        displayOrderSuccess();
     }
 
     const contactForm = document.getElementById('contact-form');
@@ -300,3 +329,4 @@ window.onclick = (event) => {
         event.target.style.display = 'none';
     }
 };
+
